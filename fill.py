@@ -2,7 +2,7 @@ import pygame, sys
 from pygame.locals import *
 from generate import GenerateTone
 
-pygame.mixer.pre_init(44100, -16, 1, 2048)
+pygame.mixer.pre_init(44100, -16, 1, 512)
 pygame.init()
 
 CHANNEL = pygame.mixer.Channel(0)
@@ -16,27 +16,30 @@ BLACK = (  0,   0,   0)
 WHITE = (255, 255, 255)
 BLUE  = (  0,   0, 255)
 
+#bottle position
 TOPX = 100
 TOPY = 50
+
+#bottle size
 BOTTLE_HEIGHT = 200
 BOTTLE_WIDTH = 100
 
+FILL_CHANGE_SIZE = 1
+
 fillPercent = 0
-FILL_CHANGE_SIZE = 5
+fillAdjust = 0
 liquidHeight = 0 #this is derived on change, get rid of this global
 
+#sound settings
 BASE_FREQ = 175
+FREQ_RANGE = 175
+VOLUME = 0.5
 tone = GenerateTone(freq=BASE_FREQ, vol=.5)
 tonePlaying = False
 
-sounds = [None, None]
-
-
-
-def updateTone(fillPercent):
-	global tone
-	newFreq = BASE_FREQ +  (175 * fillPercent / 100)
-	tone = GenerateTone(freq=newFreq, vol=.5)
+def getTone(fillPercent):
+    newFreq = BASE_FREQ +  (FREQ_RANGE * fillPercent / 100)
+    return GenerateTone(freq=newFreq, vol=VOLUME)
 
 # run the game loop
 while True:
@@ -44,29 +47,31 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == KEYUP and event.key == K_UP:
-        	if fillPercent < 100:
-        		fillPercent += FILL_CHANGE_SIZE
-        	liquidHeight = BOTTLE_HEIGHT * fillPercent / 100
-        	updateTone(fillPercent)
-        elif event.type == KEYUP and event.key == K_DOWN:
-        	if fillPercent > 0:
-        		fillPercent -= FILL_CHANGE_SIZE
-        	liquidHeight = BOTTLE_HEIGHT * fillPercent / 100 
-        	updateTone(fillPercent)
+        elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
+            fillAdjust = 0
+        elif event.type == KEYDOWN and event.key == K_UP:
+            fillAdjust = FILL_CHANGE_SIZE
+        elif event.type == KEYDOWN and event.key == K_DOWN:
+            fillAdjust = -FILL_CHANGE_SIZE
         elif event.type == KEYDOWN and event.key == K_b:
-        	tonePlaying = True
+            tonePlaying = True
         elif event.type == KEYUP and event.key == K_b:
-        	tonePlaying = False
+            tonePlaying = False
 
-    	DISPLAYSURF.fill(WHITE)
-    	pygame.draw.rect(DISPLAYSURF, BLUE, (TOPX, TOPY + (BOTTLE_HEIGHT - liquidHeight) , BOTTLE_WIDTH, liquidHeight));
-    	pygame.draw.rect(DISPLAYSURF, BLACK, (TOPX, TOPY, BOTTLE_WIDTH, BOTTLE_HEIGHT), 1);    	
+    if fillAdjust != 0:
+        fillPercent += fillAdjust
+        if fillPercent > 100:
+            fillPercent = 100
+        elif fillPercent < 0:
+            fillPercent = 0
+        liquidHeight = BOTTLE_HEIGHT * fillPercent / 100
+
+    DISPLAYSURF.fill(WHITE)
+    pygame.draw.rect(DISPLAYSURF, BLUE, (TOPX, TOPY + (BOTTLE_HEIGHT - liquidHeight) , BOTTLE_WIDTH, liquidHeight));
+    pygame.draw.rect(DISPLAYSURF, BLACK, (TOPX, TOPY, BOTTLE_WIDTH, BOTTLE_HEIGHT), 1);
+
 
     if tonePlaying:
-    	if not CHANNEL.get_busy():
-    		CHANNEL.play(tone)
-    	else:
-    		CHANNEL.queue(tone)
+        CHANNEL.queue(getTone(fillPercent))
 
     pygame.display.update()
