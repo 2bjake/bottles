@@ -52,9 +52,9 @@ while True:
             fill_adjust = FILL_RATE
         elif event.type == KEYDOWN and event.key == K_DOWN:
             fill_adjust = -FILL_RATE
-        elif event.type == KEYDOWN and event.key == K_b:
+        elif (event.type == KEYDOWN and event.key == K_b) or event.type == MOUSEBUTTONDOWN:
             tone_playing = True
-        elif event.type == KEYUP and event.key == K_b:
+        elif (event.type == KEYUP and event.key == K_b) or event.type == MOUSEBUTTONUP:
             tone_playing = False
 
     if fill_adjust != 0:
