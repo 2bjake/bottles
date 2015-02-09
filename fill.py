@@ -1,15 +1,14 @@
-import pygame, sys
+import sys
+import pygame as pg
 from pygame.locals import *
 from generate import GenerateTone
 
-pygame.mixer.pre_init(44100, -16, 1, 512)
-pygame.init()
-
-CHANNEL = pygame.mixer.Channel(0)
+pg.mixer.pre_init(44100, -16, 1, 512)
+pg.init()
 
 # set up the window
-DISPLAYSURF = pygame.display.set_mode((400, 300), 0, 32)
-pygame.display.set_caption('Fill')
+DISPLAY_SURFACE = pg.display.set_mode((400, 300), 0, 32)
+pg.display.set_caption('Fill')
 
 # set up the colors
 BLACK = (  0,   0,   0)
@@ -26,52 +25,51 @@ BOTTLE_WIDTH = 100
 
 FILL_RATE = 1
 
-fillPercent = 0
-fillAdjust = 0
-liquidHeight = 0 #this is derived on change, get rid of this global
+fill_percent = 0
+fill_adjust = 0
+liquid_height = 0 #this is derived on change, get rid of this global
 
 #sound settings
 BASE_FREQ = 175
 FREQ_RANGE = 175
 VOLUME = 0.5
 tone = GenerateTone(freq=BASE_FREQ, vol=.5)
-tonePlaying = False
+tone_playing = False
 
-def getTone(fillPercent):
-    newFreq = BASE_FREQ +  (FREQ_RANGE * fillPercent / 100)
-    return GenerateTone(freq=newFreq, vol=VOLUME)
+def getTone(fill_percent):
+    new_freq = BASE_FREQ +  (FREQ_RANGE * fill_percent / 100)
+    return GenerateTone(freq=new_freq, vol=VOLUME)
 
 # run the game loop
 while True:
-    for event in pygame.event.get():
+    for event in pg.event.get():
         if event.type == QUIT:
-            pygame.quit()
+            pg.quit()
             sys.exit()
         elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
-            fillAdjust = 0
+            fill_adjust = 0
         elif event.type == KEYDOWN and event.key == K_UP:
-            fillAdjust = FILL_RATE
+            fill_adjust = FILL_RATE
         elif event.type == KEYDOWN and event.key == K_DOWN:
-            fillAdjust = -FILL_RATE
+            fill_adjust = -FILL_RATE
         elif event.type == KEYDOWN and event.key == K_b:
-            tonePlaying = True
+            tone_playing = True
         elif event.type == KEYUP and event.key == K_b:
-            tonePlaying = False
+            tone_playing = False
 
-    if fillAdjust != 0:
-        fillPercent += fillAdjust
-        if fillPercent > 100:
-            fillPercent = 100
-        elif fillPercent < 0:
-            fillPercent = 0
-        liquidHeight = BOTTLE_HEIGHT * fillPercent / 100
+    if fill_adjust != 0:
+        fill_percent += fill_adjust
+        if fill_percent > 100:
+            fill_percent = 100
+        elif fill_percent < 0:
+            fill_percent = 0
+        liquid_height = BOTTLE_HEIGHT * fill_percent / 100
 
-    DISPLAYSURF.fill(WHITE)
-    pygame.draw.rect(DISPLAYSURF, BLUE, (TOPX, TOPY + (BOTTLE_HEIGHT - liquidHeight) , BOTTLE_WIDTH, liquidHeight));
-    pygame.draw.rect(DISPLAYSURF, BLACK, (TOPX, TOPY, BOTTLE_WIDTH, BOTTLE_HEIGHT), 1);
+    DISPLAY_SURFACE.fill(WHITE)
+    pg.draw.rect(DISPLAY_SURFACE, BLACK, (TOPX, TOPY, BOTTLE_WIDTH, BOTTLE_HEIGHT), 1);
+    pg.draw.rect(DISPLAY_SURFACE, BLUE, (TOPX, TOPY + (BOTTLE_HEIGHT - liquid_height) , BOTTLE_WIDTH, liquid_height));
 
+    if tone_playing:
+        pg.mixer.Channel(0).queue(getTone(fill_percent))
 
-    if tonePlaying:
-        CHANNEL.queue(getTone(fillPercent))
-
-    pygame.display.update()
+    pg.display.update()
