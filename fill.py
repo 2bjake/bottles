@@ -24,7 +24,7 @@ TOPY = 50
 BOTTLE_HEIGHT = 200
 BOTTLE_WIDTH = 100
 
-FILL_CHANGE_SIZE = 1
+FILL_RATE = 1
 
 fillPercent = 0
 fillAdjust = 0
@@ -50,9 +50,9 @@ while True:
         elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
             fillAdjust = 0
         elif event.type == KEYDOWN and event.key == K_UP:
-            fillAdjust = FILL_CHANGE_SIZE
+            fillAdjust = FILL_RATE
         elif event.type == KEYDOWN and event.key == K_DOWN:
-            fillAdjust = -FILL_CHANGE_SIZE
+            fillAdjust = -FILL_RATE
         elif event.type == KEYDOWN and event.key == K_b:
             tonePlaying = True
         elif event.type == KEYUP and event.key == K_b:
