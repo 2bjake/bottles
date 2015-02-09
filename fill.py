@@ -2,20 +2,29 @@ import sys
 import pygame as pg
 from pygame.locals import *
 from generate import GenerateTone as generate_tone
+from bottle import Bottle
 
 # set up the colors
 BLACK = (  0,   0,   0)
 WHITE = (255, 255, 255)
 BLUE  = (  0,   0, 255)
 
-#sound settings #TODO: move these frequency settings into bottle Class
+#TODO: these frequency settings should be derived from the shape and air volume in the bottle
+# see: http://physics.stackexchange.com/questions/44601/frequency-of-the-sound-when-blowing-in-a-bottle
 BASE_FREQ = 175
 FREQ_RANGE = 175
 VOLUME = 0.5
 
 def get_tone(fill_percent):
-    new_freq = BASE_FREQ +  (FREQ_RANGE * fill_percent / 100)
+    new_freq = BASE_FREQ + (FREQ_RANGE * fill_percent / 100)
     return generate_tone(freq=new_freq, vol=VOLUME)
+
+def draw_bottle(screen, bottle_pos_x, bottle_pos_y, bottle):
+    pg.draw.rect(screen, BLACK, (bottle_pos_x, bottle_pos_y, bottle.width, bottle.height), 1);
+    pg.draw.rect(screen, BLUE, (bottle_pos_x, bottle_pos_y + (bottle.height - bottle.liquid_height()) , bottle.width, bottle.liquid_height()));
+
+def play_bottle_tone(bottle):
+    pg.mixer.Channel(0).queue(get_tone(bottle.percent_filled))
 
 def main():
     pg.mixer.pre_init(44100, -16, 1, 512)
@@ -25,19 +34,15 @@ def main():
     screen = pg.display.set_mode((400, 300), 0, 32)
     pg.display.set_caption('Bottle Music')
 
+    my_bottle = Bottle(200, 100)
+
     #bottle position
     bottle_pos_x = 100
     bottle_pos_y = 50
 
-    #bottle size
-    bottle_height = 200
-    bottle_width = 100
-
     fill_rate = 1 # percentage to fill per cycle, range from 1 - 100
 
-    fill_percent = 0
     fill_adjust = 0
-    liquid_height = 0
 
     tone_playing = False
 
@@ -58,20 +63,13 @@ def main():
             elif (event.type == KEYUP and event.key == K_b) or event.type == MOUSEBUTTONUP:
                 tone_playing = False
 
-        if fill_adjust != 0:
-            fill_percent += fill_adjust
-            if fill_percent > 100:
-                fill_percent = 100
-            elif fill_percent < 0:
-                fill_percent = 0
-        liquid_height = bottle_height * fill_percent / 100
+        my_bottle.adjust_liquid(fill_adjust)
 
         screen.fill(WHITE)
-        pg.draw.rect(screen, BLACK, (bottle_pos_x, bottle_pos_y, bottle_width, bottle_height), 1);
-        pg.draw.rect(screen, BLUE, (bottle_pos_x, bottle_pos_y + (bottle_height - liquid_height) , bottle_width, liquid_height));
+        draw_bottle(screen, bottle_pos_x, bottle_pos_y, my_bottle)
 
         if tone_playing:
-            pg.mixer.Channel(0).queue(get_tone(fill_percent))
+            play_bottle_tone(my_bottle)
 
         pg.display.update()
 
