@@ -21,7 +21,8 @@ def get_tone(fill_percent):
 
 def draw_bottle(screen, bottle_pos_x, bottle_pos_y, bottle):
     pg.draw.rect(screen, BLACK, (bottle_pos_x, bottle_pos_y, bottle.width, bottle.height), 1);
-    pg.draw.rect(screen, BLUE, (bottle_pos_x, bottle_pos_y + (bottle.height - bottle.liquid_height()) , bottle.width, bottle.liquid_height()));
+    if bottle.liquid_height() > 0:
+        pg.draw.rect(screen, BLUE, (bottle_pos_x, bottle_pos_y + (bottle.height - bottle.liquid_height()) , bottle.width, bottle.liquid_height()));
 
 def play_bottle_tone(bottle):
     pg.mixer.Channel(0).queue(get_tone(bottle.percent_filled))
@@ -31,10 +32,10 @@ def main():
     pg.init()
 
     # set up the window
-    screen = pg.display.set_mode((400, 300), 0, 32)
+    screen = pg.display.set_mode((600, 450), 0, 32)
     pg.display.set_caption('Bottle Music')
 
-    my_bottle = Bottle(200, 100)
+    my_bottle = Bottle(200, 100, 20)
 
     #bottle position
     bottle_pos_x = 100
