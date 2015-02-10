@@ -1,7 +1,6 @@
 import sys
-import pygame as pg
-from pygame.locals import *
-from generate import GenerateTone as generate_tone
+import pyjsdl as pg
+from pyjsdl.locals import *
 from bottle import Bottle
 
 BLACK      = (  0,   0,   0)
@@ -21,9 +20,18 @@ BASE_FREQ = 175
 FREQ_RANGE = 175
 VOLUME = 0.5
 
+#TODO: collidedict() in pyjsdl doesn't support dicts with rect-like keys
+#perhaps add functionality to rect.py and submit it back?
+def collidedictkeys(self, rects):
+    for rect in rects:
+        if(self.colliderect(Rect(rect))):
+            return (rect, rects[rect])
+    return None
+
 def play_bottle_tone(bottle):
     freq = BASE_FREQ + (FREQ_RANGE * bottle.percent_filled / 100)
-    pg.mixer.Channel(0).queue(generate_tone(freq=freq, vol=VOLUME))
+    #the code in generate_tone() isn't supported by pyjsdl, ultimately, i suspect, because of numpy
+    #pg.mixer.Channel(0).play(generate_tone(freq=freq, vol=VOLUME))
 
 def render_bottle(screen, position_tuple, bottle):
     border_width = 1
@@ -45,56 +53,63 @@ def render(screen, bottles):
 
 def add_bottle(bottles, position_tuple, bottle):
     rect = pg.Rect(position_tuple, (bottle.width, bottle.height))
-    bottles[tuple(rect)] = {'bottle': bottle, 'position': position_tuple} #rect in tuple because rect isn't hashable
+    bottles[rect] = {'bottle': bottle, 'position': position_tuple} #rect in tuple because rect isn't hashable
 
-def main():
-    pg.mixer.pre_init(44100, -16, 1, 512)
-    pg.init()
+bottles = {}
+screen = None
 
-    # set up the window
-    screen = pg.display.set_mode((650, 300), 0, 32)
-    pg.display.set_caption('Bottle Music')
-
-    bottles = {}
-    add_bottle(bottles, (50, 50), Bottle(100, 200, 35, PURPLE))
-    add_bottle(bottles, (200, 50), Bottle(100, 200, 50, BLUE))
-    add_bottle(bottles, (350, 50), Bottle(100, 200, 70, GREEN))
-    add_bottle(bottles, (500, 50), Bottle(100, 200, 100, YELLOW))
-
+def run():
     fill_rate = 1 # percentage to fill per cycle, range from 1 - 100
 
     fill_adjust = 0
 
     tone_playing = False
 
-    # run the game loop
-    while True:
-        for event in pg.event.get():
-            if event.type == QUIT:
-                pg.quit()
-                sys.exit()
-            elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
-                fill_adjust = 0
-            elif event.type == KEYDOWN and event.key == K_UP:
-                fill_adjust = fill_rate
-            elif event.type == KEYDOWN and event.key == K_DOWN:
-                fill_adjust = -fill_rate
-            elif (event.type == KEYDOWN and event.key == K_b) or event.type == MOUSEBUTTONDOWN:
-                tone_playing = True
-            elif (event.type == KEYUP and event.key == K_b) or event.type == MOUSEBUTTONUP:
-                tone_playing = False
+    for event in pg.event.get():
+        if event.type == QUIT:
+            pg.quit()
+            sys.exit()
+        elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
+            fill_adjust = 0
+        elif event.type == KEYDOWN and event.key == K_UP:
+            fill_adjust = fill_rate
+        elif event.type == KEYDOWN and event.key == K_DOWN:
+            fill_adjust = -fill_rate
+        elif (event.type == KEYDOWN and event.key == K_b) or event.type == MOUSEBUTTONDOWN:
+            tone_playing = True
+        elif (event.type == KEYUP and event.key == K_b) or event.type == MOUSEBUTTONUP:
+            tone_playing = False
 
-        cursor_rect = pg.Rect(pg.mouse.get_pos(), (0, 0))
-        bottle_keyval = cursor_rect.collidedict(bottles)
 
-        if bottle_keyval is not None:
-            current_bottle = bottle_keyval[1]['bottle']
-            current_bottle.adjust_liquid(fill_adjust)
+    cursor_rect = pg.Rect(pg.mouse.get_pos(), (0, 0))
+    bottle_keyval = collidedictkeys(cursor_rect, bottles)
 
-            if tone_playing:
-                play_bottle_tone(current_bottle)
+    if bottle_keyval is not None:
+        current_bottle = bottle_keyval[1]['bottle']
+        current_bottle.adjust_liquid(fill_adjust)
 
-        render(screen, bottles)
-        pg.display.update()
+        if tone_playing:
+            play_bottle_tone(current_bottle)
+
+    render(screen, bottles)
+    pg.display.update()
+
+def main():
+    pg.mixer.pre_init(44100, -16, 1, 512)
+    pg.init()
+
+    # set up the window
+    global screen
+    screen = pg.display.set_mode((650, 300), 0, 32)
+    pg.display.set_caption('Bottle Music')
+
+    #bottles = {}
+    global bottles
+    add_bottle(bottles, (50, 50), Bottle(100, 200, 35, PURPLE))
+    add_bottle(bottles, (200, 50), Bottle(100, 200, 50, BLUE))
+    add_bottle(bottles, (350, 50), Bottle(100, 200, 70, GREEN))
+    add_bottle(bottles, (500, 50), Bottle(100, 200, 100, YELLOW))
+
+    pg.display.setup(run)
 
 if __name__ == '__main__': main()
