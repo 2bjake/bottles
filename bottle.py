@@ -1,10 +1,15 @@
 class Bottle:
     """Bottle which can be filled with liquid """
-    def __init__(self, width, height, percent_filled=0, liquid_color=(0, 0, 255)):
+
+    #TODO: the frequency should be derived from the shape and air volume in the bottle
+    # see: http://physics.stackexchange.com/questions/44601/frequency-of-the-sound-when-blowing-in-a-bottle
+    BASE_FREQ = 175
+    FREQ_RANGE = 175
+
+    def __init__(self, width, height, percent_filled=0):
         self.width = width
         self.height = height
         self.percent_filled = percent_filled
-        self.liquid_color = liquid_color
 
     def get_liquid_height(self):
         return self.height * self.percent_filled / 100
@@ -21,5 +26,9 @@ class Bottle:
             new_fill_percent = 100
         elif new_fill_percent < 0:
             new_fill_percent = 0;
-
         self.percent_filled = new_fill_percent
+
+    def get_blow_frequency(self):
+        return self.BASE_FREQ + (self.FREQ_RANGE * self.percent_filled / 100)
+
+    blow_frequency = property(get_blow_frequency)
