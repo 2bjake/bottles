@@ -35,13 +35,16 @@ def render_song(screen, song):
     note_spacing_x = 25
     song_pos_y = 400
     note_size = 50
+    phrase_size = 8
+    current_note_border = 3
 
-    for index, note in enumerate(song.notes):
+    notes = song.get_current_phrase(phrase_size)
+    for index, note in enumerate(notes['notes']):
         color = get_frequency_color(note)
         pos_x = song_pos_x + (index * (note_spacing_x + note_size))
         pg.draw.rect(screen, color, (pos_x, song_pos_y, note_size, note_size))
-        if index == song.current_note_index:
-            pg.draw.rect(screen, BOTTLE_BORDER, (pos_x, song_pos_y, note_size, note_size), 3)
+        if index == notes['cur_idx']:
+            pg.draw.rect(screen, BOTTLE_BORDER, (pos_x, song_pos_y, note_size, note_size), current_note_border)
 
 def render(screen, bottles, song):
     screen.fill(BACKGROUND)
@@ -56,16 +59,17 @@ def add_bottle(bottles, position_tuple, bottle):
 def main():
     pg.mixer.pre_init(44100, -16, 1, 512)
     pg.init()
+    clock = pg.time.Clock()
 
     # set up the window
     screen = pg.display.set_mode((650, 500), 0, 32)
     pg.display.set_caption('Bottle Music')
 
     bottles = {}
-    add_bottle(bottles, (50, 50), Bottle(100, 200, 35))
-    add_bottle(bottles, (200, 50), Bottle(100, 200, 50))
-    add_bottle(bottles, (350, 50), Bottle(100, 200, 70))
-    add_bottle(bottles, (500, 50), Bottle(100, 200, 100))
+    add_bottle(bottles, (50, 50), Bottle(100, 200))
+    add_bottle(bottles, (200, 50), Bottle(100, 200))
+    add_bottle(bottles, (350, 50), Bottle(100, 200))
+    add_bottle(bottles, (500, 50), Bottle(100, 200))
 
     song = Song()
 
@@ -77,6 +81,7 @@ def main():
     is_new_note = False
     # run the game loop
     while True:
+        clock.tick(50)
         for event in pg.event.get():
             if event.type == QUIT:
                 pg.quit()
