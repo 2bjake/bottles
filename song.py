@@ -18,7 +18,5 @@ class Song:
             return None
 
     def play_note(self, note):
-        print "current note name: ", self.get_current_note()
-        print "note color: ", get_frequency_color(note), " current note color: ", get_frequency_color(self.get_current_note())
         if get_frequency_color(note) == get_frequency_color(self.get_current_note()): #TODO: wow, someone is tired, fix this
             self.note_index += 1
