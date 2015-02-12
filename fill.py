@@ -10,10 +10,9 @@ BOTTLE_BORDER = colors.BLACK
 EMPTY_BOTTLE = (255, 255, 240)
 BACKGROUND   = (205, 200, 177)
 
-VOLUME = 0.5
-
 def play_bottle_tone(bottle):
-    pg.mixer.Channel(0).queue(generate_tone(freq=bottle.blow_frequency, vol=VOLUME))
+    volume = 0.5
+    pg.mixer.Channel(0).queue(generate_tone(freq=bottle.blow_frequency, vol=volume))
 
 def render_bottle(screen, bottle, current=False):
     border_width = 1
@@ -41,15 +40,15 @@ def render_song(screen, song):
     phrase_size = 8
     current_note_border = 3
 
-    notes = song.get_current_phrase(phrase_size)
-    for index, note in enumerate(notes['notes']):
+    phrase = song.get_current_phrase(phrase_size)
+    for index, note in enumerate(phrase['notes']):
         color = music.get_frequency_color(note)
         pos_x = song_pos_x + (index * (note_spacing_x + note_size))
         pg.draw.rect(screen, color, (pos_x, song_pos_y, note_size, note_size))
-        if index == notes['cur_idx']:
+        if index == phrase['cur_idx']:
             pg.draw.rect(screen, colors.BLACK, (pos_x, song_pos_y, note_size, note_size), current_note_border)
 
-def render(screen, cur_bottle_idx, bottles, song):
+def render(screen, bottles, cur_bottle_idx, song):
     screen.fill(BACKGROUND)
     render_song(screen, song)
     for idx, bottle in enumerate(bottles):
@@ -71,14 +70,14 @@ def main():
     for i in range(0, 4):
         x_pos = 50 + (i * 150)
         bottle_list.append(bottle_mod.Bottle((x_pos, 50), 100, 200))
-    cur_bottle_idx = 0;
 
     song = music.Song()
 
     fill_rate = 2 # percentage to fill per cycle, range from 1 - 100
 
+    #state variables that change based on input
+    cur_bottle_idx = 0;
     fill_adjust = 0
-
     tone_playing = False
     is_new_note = False
 
@@ -119,7 +118,7 @@ def main():
                 song.play_note(current_bottle.blow_frequency)
                 is_new_note = False
 
-        render(screen, cur_bottle_idx, bottle_list, song)
+        render(screen, bottle_list, cur_bottle_idx, song)
         pg.display.update()
 
 if __name__ == '__main__': main()

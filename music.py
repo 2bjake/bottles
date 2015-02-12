@@ -1,5 +1,6 @@
 import colors
 
+#TODO: add in 'black key' notes
 F3 = {'freq': 174.61, 'name': 'F3', 'color': colors.PINK}
 G3 = {'freq': 196,    'name': 'G3', 'color': colors.RED}
 A3 = {'freq': 220,    'name': 'A3', 'color': colors.ORANGE}
@@ -26,6 +27,7 @@ def get_frequency_color(freq):
             return FREQUENCY_LIST[idx - 1]['color'] if idx > 0 else colors.WHITE
     return colors.BROWN
 
+#TODO: figure out a better way to represent songs. Also, add way to select a song from the UI.
 HOT_CROSS_BUNS_NOTES = ['D4', 'C4', 'A3', 'D4', 'C4', 'A3', 'A3', 'A3', 'A3', 'A3',
                         'C4', 'C4', 'C4', 'C4', 'D4', 'C4', 'A3']
 
