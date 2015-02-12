@@ -86,6 +86,8 @@ def main():
             if event.type == QUIT:
                 pg.quit()
                 sys.exit()
+            elif event.type == KEYUP and event.key == K_r:
+                song = music.Song()
             elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
                 fill_adjust = 0
             elif event.type == KEYDOWN and event.key == K_UP:
