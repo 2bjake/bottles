@@ -6,10 +6,14 @@ class Bottle:
     BASE_FREQ = 175
     FREQ_RANGE = 175
 
-    def __init__(self, width, height, percent_filled=0):
+    def __init__(self, position, width, height, percent_filled=0):
+        self.position = position
         self.width = width
         self.height = height
         self.percent_filled = percent_filled
+
+    def get_rect(self):
+        return (self.position, (self.width, self.height))
 
     def get_liquid_height(self):
         return self.height * self.percent_filled / 100
