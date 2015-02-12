@@ -56,12 +56,14 @@ def render(screen, cur_bottle_idx, bottles, song):
         current = (idx == cur_bottle_idx)
         render_bottle(screen, bottle, current)
 
+def is_key_event(event, type, *args):
+    return event.type == type and event.key in args
+
 def main():
     pg.mixer.pre_init(44100, -16, 1, 512)
     pg.init()
     clock = pg.time.Clock()
 
-    # set up the window
     screen = pg.display.set_mode((650, 500), 0, 32)
     pg.display.set_caption('Bottle Music')
 
@@ -86,24 +88,24 @@ def main():
             if event.type == QUIT:
                 pg.quit()
                 sys.exit()
-            elif event.type == KEYUP and event.key == K_r:
+            elif is_key_event(event, KEYUP, K_r):
                 song = music.Song()
-            elif event.type == KEYUP and (event.key == K_UP or event.key == K_DOWN):
+            elif is_key_event(event, KEYUP, K_UP, K_DOWN):
                 fill_adjust = 0
-            elif event.type == KEYDOWN and event.key == K_UP:
+            elif is_key_event(event, KEYDOWN, K_UP):
                 fill_adjust = fill_rate
-            elif event.type == KEYDOWN and event.key == K_DOWN:
+            elif is_key_event(event, KEYDOWN, K_DOWN):
                 fill_adjust = -fill_rate
-            elif event.type == KEYDOWN and (event.key == K_b or event.key == K_SPACE):
+            elif is_key_event(event, KEYDOWN, K_b, K_SPACE):
                 is_new_note = not tone_playing
                 tone_playing = True
-            elif event.type == KEYUP and (event.key == K_b or event.key == K_SPACE):
+            elif is_key_event(event, KEYUP, K_b, K_SPACE):
                 tone_playing = False
-            elif event.type == KEYUP and event.key == K_LEFT:
+            elif is_key_event(event, KEYUP, K_LEFT):
                 cur_bottle_idx -= 1
                 if cur_bottle_idx < 0:
                     cur_bottle_idx = 0
-            elif event.type == KEYUP and event.key == K_RIGHT:
+            elif is_key_event(event, KEYUP, K_RIGHT):
                 cur_bottle_idx += 1
                 if cur_bottle_idx >= len(bottle_list):
                     cur_bottle_idx = len(bottle_list) - 1
