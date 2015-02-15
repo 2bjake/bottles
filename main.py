@@ -1,4 +1,5 @@
 import sys
+import random
 import pygame as pg
 from pygame.locals import *
 from generate import GenerateTone as generate_tone
@@ -66,10 +67,11 @@ def main():
     screen = pg.display.set_mode((650, 500), 0, 32)
     pg.display.set_caption('Bottle Music')
 
+    random.seed()
     bottle_list = []
     for i in range(0, 4):
         x_pos = 50 + (i * 150)
-        bottle_list.append(bottle_mod.Bottle((x_pos, 50), 100, 200))
+        bottle_list.append(bottle_mod.Bottle((x_pos, 50), 100, 200, random.randint(0, 100)))
 
     song = music.Song()
 
